@@ -61,6 +61,7 @@ set -e
 # Echo all commands which are run
 set -x
 
+echo -e &apos;\e[0;32mEnvironment setup\e[0m&apos;
 
 PYENV_HOME=$WORKSPACE/.pyenv/
 
@@ -77,52 +78,117 @@ virtualenv $PYENV_HOME
 pip install --quiet nosexcover nose pylint
 
 # Install packages for running unittests
-pip install --quiet mock
-pip install --quiet nose-exclude
-pip install --quiet yanc
-pip install --quiet coverage
 pip install --quiet -e git+git://github.com/andresriancho/nose-timer.git#egg=nose-timer
-pip install --quiet psutil
-pip install --quiet SOAPpy
+for pkg_name in mock nose-exclude yanc coverage psutil SOAPpy; do
+  pip install --quiet $pkg_name;
+done
 
 # All w3af dependencies
 pip install --quiet -e git+git://github.com/ramen/phply.git#egg=phply
-pip install --quiet PyGithub GitPython pybloomfiltermmap esmre pysqlite nltk chardet pdfminer futures pyOpenSSL scapy-real guess-language cluster msgpack-python python-ntlm lxml
-
+for pkg_name in PyGithub GitPython pybloomfiltermmap esmre pysqlite nltk chardet pdfminer futures pyOpenSSL scapy-real guess-language cluster msgpack-python python-ntlm lxml; do
+  pip install --quiet $pkg_name;
+done
 
 #
 # Actually run the tests
 #
-NOSE_ARGS=&quot; --with-xcoverage --with-xunit --with-doctest --doctest-tests --with-timer --cover-erase &quot;
+echo -e &apos;\e[0;32mw3af smoke tests without network requirements\e[0m&apos;
+NOSE_ARGS=&quot; -v --with-yanc --with-xunit --with-doctest --doctest-tests --with-timer --cover-erase &quot;
+#NOSE_ARGS=&quot; -v --with-xcoverage --with-yanc --with-xunit --with-doctest --doctest-tests --with-timer --cover-erase &quot;
 
 # Run smoke tests that don&apos;t require neither moth nor internet
-SMOKE=&quot;smoke and not internet and not moth not root&quot;
-nosetests $NOSE_ARGS -A &quot;$SMOKE&quot; --cover-package=core.data core/data/
-nosetests $NOSE_ARGS -A &quot;$SMOKE&quot; --cover-package=core.controllers core/controllers/
-nosetests $NOSE_ARGS -A &quot;$SMOKE&quot; --cover-package=core.ui core/ui/
-nosetests $NOSE_ARGS -A &quot;$SMOKE&quot; --cover-package=core.plugins plugins/
+SMOKE=&quot;smoke and not internet and not moth and not root&quot;
+nosetests $NOSE_ARGS -A &quot;$SMOKE&quot; --cover-package=core.data --cover-xml-file=coverage.data.1.xml --xunit-file=nose.data.1.xml core/data/
+nosetests $NOSE_ARGS -A &quot;$SMOKE&quot; --cover-package=core.controllers --cover-xml-file=coverage.controllers.1.xml --xunit-file=nose.controllers.1.xml core/controllers/
+nosetests $NOSE_ARGS -A &quot;$SMOKE&quot; --cover-package=core.ui.console --cover-xml-file=coverage.ui.1.xml --xunit-file=nose.ui.1.xml core/ui/console/
+nosetests $NOSE_ARGS -A &quot;$SMOKE&quot; --cover-package=core.plugins --cover-xml-file=coverage.plugins.1.xml --xunit-file=nose.plugins.1.xml plugins/
 
 # Run all tests but the ones that require moth or internet
-NOT_NETWORK=&quot;not internet and not moth not root&quot;
-nosetests $NOSE_ARGS -A &quot;$NOT_NETWORK&quot; --cover-package=core.data core/data/
-nosetests $NOSE_ARGS -A &quot;$NOT_NETWORK&quot; --cover-package=core.controllers core/controllers/
-nosetests $NOSE_ARGS -A &quot;$NOT_NETWORK&quot; --cover-package=core.ui core/ui/
-nosetests $NOSE_ARGS -A &quot;$NOT_NETWORK&quot; --cover-package=core.plugins plugins/
+echo -e &apos;\e[0;32mw3af tests without network requirements\e[0m&apos;
+NOT_NETWORK=&quot;not smoke and not internet and not moth and not root&quot;
+nosetests $NOSE_ARGS -A &quot;$NOT_NETWORK&quot; --cover-package=core.data --cover-xml-file=coverage.data.2.xml --xunit-file=nose.data.2.xml core/data/
+nosetests $NOSE_ARGS -A &quot;$NOT_NETWORK&quot; --cover-package=core.controllers --cover-xml-file=coverage.controllers.2.xml --xunit-file=nose.controllers.2.xml core/controllers/
+nosetests $NOSE_ARGS -A &quot;$NOT_NETWORK&quot; --cover-package=core.ui.console --cover-xml-file=coverage.ui.2.xml --xunit-file=nose.ui.2.xml core/ui/console/
+nosetests $NOSE_ARGS -A &quot;$NOT_NETWORK&quot; --cover-package=core.plugins --cover-xml-file=coverage.plugins.2.xml --xunit-file=nose.plugins.2.xml plugins/
 
 # Ok, now that all the fast tests passed, lets work with the slow ones which require moth or internet
-NETWORK=&quot;internet or moth not root&quot;
-nosetests $NOSE_ARGS -A &quot;$NETWORK&quot; --cover-package=core.data core/data/
-nosetests $NOSE_ARGS -A &quot;$NETWORK&quot; --cover-package=core.controllers core/controllers/
-nosetests $NOSE_ARGS -A &quot;$NETWORK&quot; --cover-package=core.ui core/ui/
-nosetests $NOSE_ARGS -A &quot;$NETWORK&quot; --cover-package=core.plugins plugins/</command>
+echo -e &apos;\e[0;32mw3af tests with network requirements\e[0m&apos;
+NETWORK=&quot;(internet or moth) and not root and not smoke&quot;
+nosetests $NOSE_ARGS -A &quot;$NETWORK&quot; --cover-package=core.data --cover-xml-file=coverage.data.3.xml --xunit-file=nose.data.3.xml core/data/
+nosetests $NOSE_ARGS -A &quot;$NETWORK&quot; --cover-package=core.controllers --cover-xml-file=coverage.controllers.3.xml --xunit-file=nose.controllers.3.xml core/controllers/
+nosetests $NOSE_ARGS -A &quot;$NETWORK&quot; --cover-package=core.ui.console --cover-xml-file=coverage.ui.3.xml --xunit-file=nose.ui.3.xml core/ui/console/
+nosetests $NOSE_ARGS -A &quot;$NETWORK&quot; --cover-package=core.plugins --cover-xml-file=coverage.plugins.3.xml --xunit-file=nose.plugins.3.xml plugins/</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
+    <hudson.plugins.cobertura.CoberturaPublisher plugin="cobertura@1.8">
+      <coberturaReportFile>*coverage*.xml</coberturaReportFile>
+      <onlyStable>true</onlyStable>
+      <failUnhealthy>false</failUnhealthy>
+      <failUnstable>false</failUnstable>
+      <autoUpdateHealth>false</autoUpdateHealth>
+      <autoUpdateStability>false</autoUpdateStability>
+      <zoomCoverageChart>false</zoomCoverageChart>
+      <failNoReports>true</failNoReports>
+      <healthyTarget>
+        <targets class="enum-map" enum-type="hudson.plugins.cobertura.targets.CoverageMetric">
+          <entry>
+            <hudson.plugins.cobertura.targets.CoverageMetric>CONDITIONAL</hudson.plugins.cobertura.targets.CoverageMetric>
+            <int>7000000</int>
+          </entry>
+          <entry>
+            <hudson.plugins.cobertura.targets.CoverageMetric>LINE</hudson.plugins.cobertura.targets.CoverageMetric>
+            <int>8000000</int>
+          </entry>
+          <entry>
+            <hudson.plugins.cobertura.targets.CoverageMetric>METHOD</hudson.plugins.cobertura.targets.CoverageMetric>
+            <int>8000000</int>
+          </entry>
+        </targets>
+      </healthyTarget>
+      <unhealthyTarget>
+        <targets class="enum-map" enum-type="hudson.plugins.cobertura.targets.CoverageMetric">
+          <entry>
+            <hudson.plugins.cobertura.targets.CoverageMetric>CONDITIONAL</hudson.plugins.cobertura.targets.CoverageMetric>
+            <int>0</int>
+          </entry>
+          <entry>
+            <hudson.plugins.cobertura.targets.CoverageMetric>LINE</hudson.plugins.cobertura.targets.CoverageMetric>
+            <int>0</int>
+          </entry>
+          <entry>
+            <hudson.plugins.cobertura.targets.CoverageMetric>METHOD</hudson.plugins.cobertura.targets.CoverageMetric>
+            <int>0</int>
+          </entry>
+        </targets>
+      </unhealthyTarget>
+      <failingTarget>
+        <targets class="enum-map" enum-type="hudson.plugins.cobertura.targets.CoverageMetric">
+          <entry>
+            <hudson.plugins.cobertura.targets.CoverageMetric>CONDITIONAL</hudson.plugins.cobertura.targets.CoverageMetric>
+            <int>0</int>
+          </entry>
+          <entry>
+            <hudson.plugins.cobertura.targets.CoverageMetric>LINE</hudson.plugins.cobertura.targets.CoverageMetric>
+            <int>0</int>
+          </entry>
+          <entry>
+            <hudson.plugins.cobertura.targets.CoverageMetric>METHOD</hudson.plugins.cobertura.targets.CoverageMetric>
+            <int>0</int>
+          </entry>
+        </targets>
+      </failingTarget>
+      <sourceEncoding>UTF_8</sourceEncoding>
+    </hudson.plugins.cobertura.CoberturaPublisher>
     <hudson.tasks.junit.JUnitResultArchiver>
-      <testResults>nosetests.xml</testResults>
+      <testResults>*nose*.xml</testResults>
       <keepLongStdio>false</keepLongStdio>
       <testDataPublishers/>
     </hudson.tasks.junit.JUnitResultArchiver>
   </publishers>
-  <buildWrappers/>
+  <buildWrappers>
+    <hudson.plugins.ansicolor.AnsiColorBuildWrapper plugin="ansicolor@0.3.1">
+      <colorMapName>xterm</colorMapName>
+    </hudson.plugins.ansicolor.AnsiColorBuildWrapper>
+  </buildWrappers>
 </project>
