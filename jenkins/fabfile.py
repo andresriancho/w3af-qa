@@ -29,6 +29,8 @@ from utils.git import git_pull, git_configure, git_clone
 from utils.ubuntu import (install_packages, set_etc_hosts, remove_bash_history,
                           keep_sudo_env, set_hostname)
 
+import config
+
 # http://docs.fabfile.org/en/latest/usage/env.html#forward-agent
 # Use our local SSH keys for accessing github for pull, useful for deploy,
 # and backups.
