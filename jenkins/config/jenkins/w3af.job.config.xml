@@ -90,26 +90,32 @@ pip install --quiet lxml
 # All the other w3af packages
 pip install --quiet PyGithub GitPython pybloomfiltermmap esmre pysqlite nltk chardet pdfminer futures pyOpenSSL scapy-real guess-language cluster msgpack-python python-ntlm
 
-$nose_common_args = &quot; --with-xcoverage --with-xunit --with-doctest --doctest-tests --with-timer --cover-erase &quot;
-$smoke = &apos; -A &quot;smoke and not internet and not moth&quot; &apos;
+#
+# Actually run the tests
+#
+NOSE_ARGS=&quot; --with-xcoverage --with-xunit --with-doctest --doctest-tests --with-timer --cover-erase &quot;
 
 # Run smoke tests that don&apos;t require neither moth nor internet
-nosetests $nose_common_args $smoke --cover-package=core.data core/data/
-nosetests --with-xcoverage --with-xunit --cover-package=core --cover-erase -A &quot;smoke and not internet and not moth&quot; core/controllers/
-nosetests --with-xcoverage --with-xunit --cover-package=core --cover-erase -A &quot;smoke and not internet and not moth&quot; core/ui/
-nosetests --with-xcoverage --with-xunit --cover-package=core --cover-erase -A &quot;smoke and not internet and not moth&quot; plugins/
+SMOKE=&apos; -A &quot;smoke and not internet and not moth&quot; &apos;
+nosetests $NOSE_ARGS $SMOKE --cover-package=core.data core/data/
+nosetests $NOSE_ARGS $SMOKE --cover-package=core.controllers core/controllers/
+nosetests $NOSE_ARGS $SMOKE --cover-package=core.ui core/ui/
+nosetests $NOSE_ARGS $SMOKE --cover-package=core.plugins plugins/
 
 # Run all tests but the ones that require moth or internet
-nosetests --with-xcoverage --with-xunit --cover-package=core --cover-erase -A &quot;not internet and not moth&quot; core/data/
-nosetests --with-xcoverage --with-xunit --cover-package=core --cover-erase -A &quot;not internet and not moth&quot; core/controllers/
-nosetests --with-xcoverage --with-xunit --cover-package=core --cover-erase -A &quot;not internet and not moth&quot; core/ui/
-nosetests --with-xcoverage --with-xunit --cover-package=core --cover-erase -A &quot;not internet and not moth&quot; plugins/
+NOT_NETWORK=&apos;-A &quot;not internet and not moth&quot;&apos;
+nosetests $NOSE_ARGS $NOT_NETWORK --cover-package=core.data core/data/
+nosetests $NOSE_ARGS $NOT_NETWORK --cover-package=core.controllers core/controllers/
+nosetests $NOSE_ARGS $NOT_NETWORK --cover-package=core.ui core/ui/
+nosetests $NOSE_ARGS $NOT_NETWORK --cover-package=core.plugins plugins/
 
 # Ok, now that all the fast tests passed, lets work with the slow ones which require moth or internet
-nosetests --with-xcoverage --with-xunit --cover-package=core --cover-erase -A &quot;internet or moth&quot; core/data/
-nosetests --with-xcoverage --with-xunit --cover-package=core --cover-erase -A &quot;internet or moth&quot; core/controllers/
-nosetests --with-xcoverage --with-xunit --cover-package=core --cover-erase -A &quot;internet or moth&quot; core/ui/
-nosetests --with-xcoverage --with-xunit --cover-package=core --cover-erase -A &quot;internet or moth&quot; plugins/</command>
+NETWORK=&apos;-A &quot;internet or moth&quot;&apos;
+nosetests $NOSE_ARGS $NETWORK --cover-package=core.data core/data/
+nosetests $NOSE_ARGS $NETWORK --cover-package=core.controllers core/controllers/
+nosetests $NOSE_ARGS $NETWORK --cover-package=core.ui core/ui/
+nosetests $NOSE_ARGS $NETWORK --cover-package=core.plugins plugins/
+</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
