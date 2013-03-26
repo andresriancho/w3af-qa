@@ -21,9 +21,15 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 '''
 from __future__ import with_statement
+
 from fabric.api import task, sudo, settings
 from fabric.colors import green
+from fabric.operations import prompt
+from fabric.api import env
+from fabric.contrib import files
+
 from utils.ubuntu import update, install
+from utils.filesystem import links_to
 
 
 @task
@@ -42,13 +48,21 @@ def install_jenkins():
 @task
 def configure_jenkins():
     with settings(warn_only=True):
-        # TODO: This test is too simple
-        if sudo("test -e /var/lib/jenkins/config.xml").succeeded:
+        if files.contains('/var/lib/jenkins/config.xml', 'hudson.security.PAMSecurityRealm'):
             print(green('Jenkins is already configured'))
             return
 
-    #TODO: What to do here?
+    # I want to have user authentication based on the unix pam
+    sudo('usermod -a -G shadow jenkins')
 
+    # And I want to be able to login!
+    username = prompt("Jenkins username: ")
+    password = prompt("%s username password: ")
+    sudo('useradd %s -p `openssl passwd -1 %s`' % (username, password))
+
+    deploy_dir = env.conf['deploy_dir']
+    links_to('/var/lib/jenkins/config.xml', '%sjenkins/config/jenkins/global.config.xml' % deploy_dir)
+    
     print(green('Finished Jenkins configuration.'))
 
 def restart_jenkins():
