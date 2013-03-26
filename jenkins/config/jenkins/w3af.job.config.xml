@@ -96,21 +96,21 @@ pip install --quiet PyGithub GitPython pybloomfiltermmap esmre pysqlite nltk cha
 NOSE_ARGS=&quot; --with-xcoverage --with-xunit --with-doctest --doctest-tests --with-timer --cover-erase &quot;
 
 # Run smoke tests that don&apos;t require neither moth nor internet
-SMOKE=&quot;smoke and not internet and not moth&quot;
+SMOKE=&quot;smoke and not internet and not moth not root&quot;
 nosetests $NOSE_ARGS -A &quot;$SMOKE&quot; --cover-package=core.data core/data/
 nosetests $NOSE_ARGS -A &quot;$SMOKE&quot; --cover-package=core.controllers core/controllers/
 nosetests $NOSE_ARGS -A &quot;$SMOKE&quot; --cover-package=core.ui core/ui/
 nosetests $NOSE_ARGS -A &quot;$SMOKE&quot; --cover-package=core.plugins plugins/
 
 # Run all tests but the ones that require moth or internet
-NOT_NETWORK=&quot;not internet and not moth&quot;
+NOT_NETWORK=&quot;not internet and not moth not root&quot;
 nosetests $NOSE_ARGS -A &quot;$NOT_NETWORK&quot; --cover-package=core.data core/data/
 nosetests $NOSE_ARGS -A &quot;$NOT_NETWORK&quot; --cover-package=core.controllers core/controllers/
 nosetests $NOSE_ARGS -A &quot;$NOT_NETWORK&quot; --cover-package=core.ui core/ui/
 nosetests $NOSE_ARGS -A &quot;$NOT_NETWORK&quot; --cover-package=core.plugins plugins/
 
 # Ok, now that all the fast tests passed, lets work with the slow ones which require moth or internet
-NETWORK=&quot;internet or moth&quot;
+NETWORK=&quot;internet or moth not root&quot;
 nosetests $NOSE_ARGS -A &quot;$NETWORK&quot; --cover-package=core.data core/data/
 nosetests $NOSE_ARGS -A &quot;$NETWORK&quot; --cover-package=core.controllers core/controllers/
 nosetests $NOSE_ARGS -A &quot;$NETWORK&quot; --cover-package=core.ui core/ui/
