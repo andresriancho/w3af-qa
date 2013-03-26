@@ -1,0 +1,123 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>w3af&apos;s build</description>
+  <keepDependencies>false</keepDependencies>
+  <properties/>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@1.3.0">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <name></name>
+        <refspec></refspec>
+        <url>git://github.com/andresriancho/w3af.git</url>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>threading2</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <disableSubmodules>false</disableSubmodules>
+    <recursiveSubmodules>false</recursiveSubmodules>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <authorOrCommitter>false</authorOrCommitter>
+    <clean>false</clean>
+    <wipeOutWorkspace>false</wipeOutWorkspace>
+    <pruneBranches>false</pruneBranches>
+    <remotePoll>false</remotePoll>
+    <ignoreNotifyCommit>false</ignoreNotifyCommit>
+    <useShallowClone>false</useShallowClone>
+    <buildChooser class="hudson.plugins.git.util.DefaultBuildChooser"/>
+    <gitTool>Default</gitTool>
+    <browser class="hudson.plugins.git.browser.GithubWeb">
+      <url>https://github.com/andresriancho/w3af/</url>
+    </browser>
+    <submoduleCfg class="list"/>
+    <relativeTargetDir></relativeTargetDir>
+    <reference></reference>
+    <excludedRegions></excludedRegions>
+    <excludedUsers></excludedUsers>
+    <gitConfigName></gitConfigName>
+    <gitConfigEmail></gitConfigEmail>
+    <skipTag>false</skipTag>
+    <includedRegions></includedRegions>
+    <scmName></scmName>
+  </scm>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers class="vector"/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>#!/bin/bash
+
+# Any subsequent commands which fail will cause the shell script to exit immediately
+# this is useful for the nosetests commands since they return 1 on error
+set -e
+
+# Echo all commands which are run
+set -x
+
+
+PYENV_HOME=$WORKSPACE/.pyenv/
+
+# Delete previously built virtualenv
+if [ -d $PYENV_HOME ]; then
+    rm -rf $PYENV_HOME
+fi
+
+# Create virtualenv and install necessary packages
+virtualenv $PYENV_HOME
+. $PYENV_HOME/bin/activate
+
+# Install jenkins packages
+pip install --quiet nosexcover nose pylint
+
+# Install packages for running unittests
+pip install --quiet mock
+pip install --quiet nose-exclude
+pip install --quiet yanc
+pip install --quiet coverage
+pip install --quiet -e git+git://github.com/andresriancho/nose-timer.git#egg=nose-timer
+pip install --quiet psutil
+
+# Install w3af&apos;s packages
+pip install --quiet lxml
+
+# All the other w3af packages
+pip install --quiet PyGithub GitPython pybloomfiltermmap esmre pysqlite nltk chardet pdfminer futures pyOpenSSL scapy-real guess-language cluster msgpack-python python-ntlm
+
+$nose_common_args = &quot; --with-xcoverage --with-xunit --with-doctest --doctest-tests --with-timer --cover-erase &quot;
+$smoke = &apos; -A &quot;smoke and not internet and not moth&quot; &apos;
+
+# Run smoke tests that don&apos;t require neither moth nor internet
+nosetests $nose_common_args $smoke --cover-package=core.data core/data/
+nosetests --with-xcoverage --with-xunit --cover-package=core --cover-erase -A &quot;smoke and not internet and not moth&quot; core/controllers/
+nosetests --with-xcoverage --with-xunit --cover-package=core --cover-erase -A &quot;smoke and not internet and not moth&quot; core/ui/
+nosetests --with-xcoverage --with-xunit --cover-package=core --cover-erase -A &quot;smoke and not internet and not moth&quot; plugins/
+
+# Run all tests but the ones that require moth or internet
+nosetests --with-xcoverage --with-xunit --cover-package=core --cover-erase -A &quot;not internet and not moth&quot; core/data/
+nosetests --with-xcoverage --with-xunit --cover-package=core --cover-erase -A &quot;not internet and not moth&quot; core/controllers/
+nosetests --with-xcoverage --with-xunit --cover-package=core --cover-erase -A &quot;not internet and not moth&quot; core/ui/
+nosetests --with-xcoverage --with-xunit --cover-package=core --cover-erase -A &quot;not internet and not moth&quot; plugins/
+
+# Ok, now that all the fast tests passed, lets work with the slow ones which require moth or internet
+nosetests --with-xcoverage --with-xunit --cover-package=core --cover-erase -A &quot;internet or moth&quot; core/data/
+nosetests --with-xcoverage --with-xunit --cover-package=core --cover-erase -A &quot;internet or moth&quot; core/controllers/
+nosetests --with-xcoverage --with-xunit --cover-package=core --cover-erase -A &quot;internet or moth&quot; core/ui/
+nosetests --with-xcoverage --with-xunit --cover-package=core --cover-erase -A &quot;internet or moth&quot; plugins/</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+    <hudson.tasks.junit.JUnitResultArchiver>
+      <testResults>nosetests.xml</testResults>
+      <keepLongStdio>false</keepLongStdio>
+      <testDataPublishers/>
+    </hudson.tasks.junit.JUnitResultArchiver>
+  </publishers>
+  <buildWrappers/>
+</project>
