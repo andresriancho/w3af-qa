@@ -63,6 +63,14 @@ def configure_jenkins():
     deploy_dir = env.conf['deploy_dir']
     links_to('/var/lib/jenkins/config.xml', '%sjenkins/config/jenkins/global.config.xml' % deploy_dir)
     
+    # Configure the GIT plugin
+    links_to('/var/lib/jenkins/hudson.plugins.git.GitSCM.xml', '%sjenkins/config/jenkins/hudson.plugins.git.GitSCM.xml' % deploy_dir)
+    
+    # Configure the w3af build job
+    sudo('mkdir -p /var/lib/jenkins/jobs/w3af/')
+    sudo('mkdir -p /var/lib/jenkins/jobs/w3af/builds/')
+    links_to('/var/lib/jenkins/jobs/w3af/config.xml', '%sjenkins/config/jenkins/w3af.job.config.xml' % deploy_dir)
+    
     print(green('Finished Jenkins configuration.'))
 
 def restart_jenkins():
