@@ -75,7 +75,9 @@ virtualenv $PYENV_HOME
 . $PYENV_HOME/bin/activate
 
 # Install jenkins packages
-pip install --quiet nosexcover nose pylint
+pip install --quiet nose pylint
+# I use my own version of nosexcover which adds the --xcoverage-to-stdout=0 feature
+pip install --quiet -e git+git://github.com/andresriancho/nose-xcover.git#egg=nosexcover
 
 # Install packages for running unittests
 pip install --quiet -e git+git://github.com/andresriancho/nose-timer.git#egg=nose-timer
@@ -93,8 +95,7 @@ done
 # Actually run the tests
 #
 echo -e &apos;\e[0;32mw3af smoke tests without network requirements\e[0m&apos;
-NOSE_ARGS=&quot; -v --with-yanc --with-xunit --with-doctest --doctest-tests --with-timer --cover-erase &quot;
-#NOSE_ARGS=&quot; -v --with-xcoverage --with-yanc --with-xunit --with-doctest --doctest-tests --with-timer --cover-erase &quot;
+NOSE_ARGS=&quot; -v --xcoverage-to-stdout=0 --with-xcoverage --with-yanc --with-xunit --with-doctest --doctest-tests --with-timer --cover-erase --timer-top-n=20&quot;
 
 # Run smoke tests that don&apos;t require neither moth nor internet
 SMOKE=&quot;smoke and not internet and not moth and not root&quot;
