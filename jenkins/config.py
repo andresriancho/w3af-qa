@@ -30,7 +30,8 @@ env.conf = {
              
             'packages': ['python-virtualenv', 'git', 'python-pip', 'python2.7-dev',
                          'python-setuptools', 'build-essential', 'libsqlite3-dev',
-                         'libxml2-dev', 'libxslt-dev', 'apache2', 'joe'],
+                         'libxml2-dev', 'libxslt-dev', 'apache2', 'joe',
+                         'postfix'],
             
             'deploy_dir': '/opt/ci.w3af.org/w3af-qa/',
             'deploy_dir_parent': '/opt/ci.w3af.org/',
