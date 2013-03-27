@@ -34,14 +34,14 @@ def install_packages(packages):
     install(' '.join(packages))
 
 def install(package):
-    sudo("apt-get -y install %s" % package)
+    sudo("apt-get --quiet --assume-yes install %s" % package)
 
 def update():
-    sudo('apt-get update')
+    sudo('apt-get --quiet --assume-yes update')
 
 def dist_upgrade():
-    sudo('apt-get -y dist-upgrade')
-    sudo('apt-get -y autoremove')
+    sudo('apt-get --quiet --assume-yes dist-upgrade')
+    sudo('apt-get --quiet --assume-yes autoremove')
 
 DETECTION_ERROR_MESSAGE = """
 OS detection failed. This probably means your OS is not
