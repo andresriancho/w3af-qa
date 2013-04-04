@@ -26,6 +26,7 @@ from fabric.api import task, env, sudo
 from utils.apache import configure_apache, restart_apache
 from utils.jenkins import install_jenkins, configure_jenkins, restart_jenkins
 from utils.git import git_pull, git_configure, git_clone
+from utils.sudo import configure_sudo
 from utils.cloudflare import (update_cname_pointer,
                               encrypt_api_key_for_storage)
 from utils.ubuntu import (install_packages, set_etc_hosts, remove_bash_history,
@@ -58,7 +59,8 @@ def deploy():
     install_jenkins()
     configure_jenkins()
     configure_apache()
-
+    configure_sudo()
+    
     set_etc_hosts()
 
     restart_daemons()
