@@ -35,6 +35,4 @@ env.conf = {
             
             'deploy_dir': '/opt/ci.w3af.org/w3af-qa/',
             'deploy_dir_parent': '/opt/ci.w3af.org/',
-            
-            'cloudflare_api_key': 'Ru4gTtg0HiPR1DPBoO9mOy2ekOhUa+K7czl9CLN6hfmO4R7XdOSyG18C8YBAIjXUdq5PXjfEDhZGFPF7yPMLGQ==',
             }

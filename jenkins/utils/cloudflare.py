@@ -24,6 +24,7 @@ import urllib2
 import urllib
 import json
 import sys
+import keyring
 
 from fabric.api import env, task
 from fabric.operations import prompt
@@ -31,11 +32,28 @@ from fabric.colors import green, red
 
 from utils.security import decrypt_aes, encrypt_aes
 
+PASSWD_HOST = 'cloudflare-jenkins-deploy'
+PASSWD_USER = 'API'
 
 def get_api_key():
-    cloudflare_api_key = env.conf['cloudflare_api_key']
-    api_key_passwd = prompt('Please enter your API key encryption password:')
-    return decrypt_aes(api_key_passwd, cloudflare_api_key)
+    '''
+    Note: This will use the system's keyring and only ask for the password
+          once! Also, it stores the password in a safe manner.
+    '''
+    
+    api_key_passwd = keyring.get_password(PASSWD_HOST, PASSWD_USER)
+    
+    if api_key_passwd is None:
+        api_key_passwd = prompt('Please enter your API key (will store in OS keyring):')
+        keyring.set_password(PASSWD_HOST, PASSWD_USER, api_key_passwd)
+    
+    return api_key_passwd
+
+@task
+def clear_keyring():
+    #TODO!
+    #keyring.delete_password(PASSWD_HOST, PASSWD_USER)
+    pass
 
 @task
 def update_cname_pointer():
